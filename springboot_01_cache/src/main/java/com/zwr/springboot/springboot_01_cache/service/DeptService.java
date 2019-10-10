@@ -21,6 +21,9 @@ public class DeptService {
     @Autowired(required = false)
     DepartmentMapper departmentMapper;
 
+    @Qualifier("deptCacheManager")
+    @Autowired
+    RedisCacheManager deptCacheManager;
 
     //直接使用 自定义的empRedisTemplate来操作缓存
     @Autowired
@@ -36,6 +39,23 @@ public class DeptService {
         System.out.println("查询部门"+id);
         Department department = departmentMapper.getDeptById(id);
         deptRedisTemplate.opsForValue().set("部门",department);
+        return department;
+    }
+
+
+    /**
+     * 使用api 进行手动调用
+     * @param id
+     * @return
+     */
+    public Department getDeptById(Integer id){
+        System.out.println("查询部门"+id);
+        Department department = departmentMapper.getDeptById(id);
+
+        //获取某个缓存
+        Cache dept = deptCacheManager.getCache("dept");
+        dept.put("dept:1",department);
+
         return department;
     }
 
